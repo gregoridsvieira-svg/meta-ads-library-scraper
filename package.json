@@ -1,6 +1,6 @@
 {
   "name": "meta-ads-library-scraper",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Advanced Meta Ads Library scraper with 2025 anti-detection capabilities and GraphQL interception",
   "main": "src/main.js",
   "scripts": {

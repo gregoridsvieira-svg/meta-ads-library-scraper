@@ -261,11 +261,16 @@ class MetaAdsLibraryScraperV2 {
             // Updated selectors for 2025 Facebook Ads Library
             const adSelectors = [
                 '[data-testid="ad_library_card"]',
-                '[data-testid="ad-library-card"]', 
+                '[data-testid="ad-library-card"]',
+                '[data-testid="ad_card"]',
                 '[role="article"]',
+                'div[class*="x1yztbdb"]',
+                'div[class*="ad-library-card"]',
                 '.x1yztbdb.x1d52u69',
                 '.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k',
-                '[data-pagelet="AdLibrarySearchResults"] > div > div'
+                '[data-pagelet="AdLibrarySearchResults"] > div > div',
+                'div[class*="_5m_f"]',
+                'div[class*="fbAdCard"]'
             ];
             
             let adElements = [];
@@ -448,9 +453,18 @@ class MetaAdsLibraryScraperV2 {
 
     async waitForAdsToLoad(page) {
         try {
-            // Wait for any of the possible ad selectors with longer timeout
-            await page.waitForSelector('[data-testid="ad_library_card"], [data-testid="ad-library-card"], [role="article"], .x1yztbdb', {
-                timeout: 20000
+            // Wait for any of the possible ad selectors with longer timeout (40s)
+            const selectors = [
+                '[data-testid="ad_library_card"]',
+                '[data-testid="ad-library-card"]',
+                '[data-testid="ad_card"]',
+                '[role="article"]',
+                'div[class*="x1yztbdb"]',
+                'div[class*="ad-library-card"]'
+            ];
+            
+            await page.waitForSelector(selectors.join(', '), {
+                timeout: 40000  // Aumentado de 20s para 40s
             });
             
             // Additional wait for dynamic content
@@ -551,7 +565,9 @@ class MetaAdsLibraryScraperV2 {
             for (const selector of searchSelectors) {
                 const searchInput = await page.$(selector);
                 if (searchInput) {
-                    await searchInput.clear();
+                    // Clear input usando fill('') ao invés de clear()
+                    await searchInput.fill('');
+                    await ModernAntiDetection.humanLikeDelay(500, 1000);
                     await searchInput.type(searchQuery, { delay: 100 });
                     await page.keyboard.press('Enter');
                     await ModernAntiDetection.humanLikeDelay(3000, 5000);
@@ -700,7 +716,14 @@ Actor.main(async () => {
                     const adsLoadedRetry = await scraper.waitForAdsToLoad(page);
                     if (!adsLoadedRetry) {
                         console.log('Still no ads found after retry');
-                        return;
+                        
+                        // Se GraphQL interceptou algo, continuar mesmo assim
+                        if (scraper.adData.length > 0) {
+                            console.log(`But we have ${scraper.adData.length} ads from GraphQL interception, continuing...`);
+                        } else {
+                            console.log('No ads from GraphQL either, exiting...');
+                            return;
+                        }
                     }
                 }
                 
