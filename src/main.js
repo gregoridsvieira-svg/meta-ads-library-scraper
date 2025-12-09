@@ -463,9 +463,13 @@ class MetaAdsLibraryScraperV2 {
                 'div[class*="ad-library-card"]'
             ];
             
+            // Não esperar por visibilidade, apenas por presença no DOM
             await page.waitForSelector(selectors.join(', '), {
-                timeout: 40000  // Aumentado de 20s para 40s
+                timeout: 40000,
+                state: 'attached'  // Apenas verificar se está no DOM, não se está visível
             });
+            
+            console.log('✅ Ad elements found in DOM');
             
             // Additional wait for dynamic content
             await ModernAntiDetection.humanLikeDelay(3000, 5000);
@@ -476,6 +480,18 @@ class MetaAdsLibraryScraperV2 {
             return true;
         } catch (error) {
             console.log('Timeout waiting for ads to load:', error.message);
+            
+            // Mesmo com timeout, verificar se há elementos no DOM
+            try {
+                const count = await page.$$eval('div[class*="x1yztbdb"]', els => els.length);
+                if (count > 0) {
+                    console.log(`Found ${count} potential ad elements despite timeout, continuing...`);
+                    return true;
+                }
+            } catch (e) {
+                console.log('No elements found in fallback check');
+            }
+            
             return false;
         }
     }
