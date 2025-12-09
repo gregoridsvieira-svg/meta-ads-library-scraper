@@ -3,7 +3,7 @@
   "name": "meta-ads-library-scraper",
   "title": "Meta Ads Library Scraper 2025",
   "description": "Next-generation Meta (Facebook) Ads Library scraper with 2025 anti-detection techniques, GraphQL interception, advanced stealth capabilities, and comprehensive data extraction. Features modern fingerprinting evasion, proxy rotation, and human behavior simulation.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "meta": {
     "templateId": "javascript-crawlee"
   },
